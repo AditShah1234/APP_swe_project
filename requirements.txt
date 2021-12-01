@@ -7,6 +7,5 @@ flask-wtf
 flask-bootstrap
 flask-login
 email-validator
-Bootstrap
 flask-migrate
 wtforms
