@@ -1,0 +1,25 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Fitness App
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='welcome.css')}}">
+{% endblock %}
+
+{% block content %}
+    <!-- <a href="{{ url_for('thin') }}"><button class='btn btn-default'>Thin</button></a>
+    <a href="{{ url_for('lean') }}"><button class='btn btn-default'>Lean</button></a>
+    <a href="{{ url_for('fit') }}"><button class='btn btn-default'>Fit</button></a>
+     -->
+    <div>
+      <ul>
+          <li id="left-container"><a href="{{ url_for('thin') }}">Thin </a></li>
+          <li id="right-container"><a href="{{ url_for('lean') }}">Lean </a></li>
+          <li id="right-container"><a href="{{ url_for('fit') }}">Fit </a></li>
+      </ul>
+  
+  </div>
+{% endblock %}
