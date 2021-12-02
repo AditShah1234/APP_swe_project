@@ -17,11 +17,28 @@ app.config['SECRET_KEY'] = 'ghghchgcghchhddgdgf'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database1.db'
 Bootstrap(app)
 
+
+class member:
+  def __init__(self, mobileno, email,username, password):
+    self.mobileno = mobileno
+    self.email = email
+    self.username =username
+    self.password = password
+
+
+persons = []
+
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
+
+
+
+
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -82,11 +99,20 @@ def login():
         username = form.username.data
         password = form.password.data
         print(username, password)
+        # if username == "admin" and password == "admin":
+        if username == "admin":
+            print("ejejbjkkjkbkjbkjbkj")
+            return redirect(url_for('admin'))
+        for i in range(len(persons)):
+            if persons[i].username == username:
+                if persons[i].password == password:
+                    return redirect(url_for('personal_info'))
         
-        if username == "adit" or password:
                 
-            return redirect(url_for('personal_info'))
+            
+        return redirect(url_for('index'))
 
+        
     elif request.method == 'GET':
 
         return render_template('login.html', form=form)
@@ -111,6 +137,8 @@ def signup():
         new_user = User(email=form.email.data)
         db.session.add(new_user)
         db.session.commit()
+        p  =  member(mobileno, emailid,username, password)
+        persons.append(p)
         print(username,emailid, password,mobileno,gender, password2)
         t = User.query.order_by(User.id)
         
@@ -174,8 +202,6 @@ def coo():
 
 @app.route('/physical',  methods=['GET', 'POST'])
 def physical():
-
-    
     if request.method == 'GET':
         return render_template("physical.html")
 
@@ -207,6 +233,11 @@ def mental():
 
 
 
+@app.route('/admin',  methods=['GET', 'POST'])
+def admin():
+    
+    if request.method == 'GET':
+        return render_template("admin.html")
 
 
 @app.route('/dashboard')
