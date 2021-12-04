@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-Admin
+Doctor Service page
 {% endblock %}
 
 {% block styles %}
@@ -10,7 +10,7 @@ Admin
 <link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
 {% endblock %}
 {% block content %}
-<h1> Welcome Admin</h1>
+<h1> Welcome Doc</h1>
 <table border = "2">
     <tr>
        {% for header in heading %}
@@ -29,9 +29,8 @@ Admin
  </table>
  <div class="container">
     
-        <li id="delete_record"><a href="{{ url_for('delete_user') }}">Delete the record </a></li>
-        <li id="change_doc"><a href="{{ url_for('change_doc') }}">Change the doctor </a></li>
-        <li id="add_doc"><a href="{{ url_for('add_doc') }}">Add the doctor </a></li>
+        <li id="add_remark"><a href="{{ url_for('add_remark') }}">Add remark</a></li>
+       
 
  </div> 
 {% endblock %}

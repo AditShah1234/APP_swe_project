@@ -67,8 +67,23 @@ class Mental_info(FlaskForm):
     q8 = RadioField('q8', choices=[('Yes','Yes'),('No','No')])
     q9 = RadioField('q9', choices=[('Yes','Yes'),('No','No')])
 
+class DeleteUser(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
 
+class ChangeDoc(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    doctor_name = StringField('Doctor Name', validators=[InputRequired(), Length(min=4, max=15)])
 
+class AddDoc(FlaskForm):
+    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=4, max=80)])
+    mobile_number = StringField('mobile_number', validators=[InputRequired(), Length(10)])
+    gender = RadioField('gender', choices=[('Male','Male'),('Female','Female')])
+    
+class DocPatient(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    remark =TextAreaField('Special Remark', render_kw={"rows": 70, "cols": 11})
     
 @app.route('/')
 def index():
@@ -84,7 +99,7 @@ def login():
         print(username, password)
         # if username == "admin" and password == "admin":
         if username == "admin":
-           
+            session["username"] = "admin"
             return redirect(url_for('admin'))
 
         conn = sqlite3.connect('database.db')
@@ -101,6 +116,11 @@ def login():
         if actual_pass != password:
             return render_template('login.html', form=form, message = "Password is wrong")
         else:
+            print(check[0][12])
+            if check[0][12] == "Yes":
+                session["doc"] = username
+                return redirect(url_for('doc_page'))
+            
             
             session["username"] = username
             if check[0][6] == "null" or check[0][6] == None:
@@ -145,7 +165,7 @@ def signup():
             return render_template("signup.html", form=form, message = "The user name exist select other username")
 
 
-        c.execute("INSERT INTO member VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ", (p.username, p.email, p.password,gender,mobileno,None,None,None,None,None,None, None))
+        c.execute("INSERT INTO member VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ", (p.username, p.email, p.password,gender,mobileno,None,None,None,None,None,None, None, "NO"))
         conn.commit()
         # c.execute("select * from member")
         # print(c.fetchall())
@@ -321,13 +341,56 @@ def mental():
         return render_template("mental.html",form=form)
 
 
+@app.route('/doc_page',  methods=['GET', 'POST'])
+def doc_page():
+    
+    if request.method == 'GET':
+        
+        conn = sqlite3.connect('database.db')
+        
+
+        c = conn.cursor()
+
+        check = c.execute("SELECT * FROM member WHERE Doctor=?",(session["doc"] ,))
+        rows = c.fetchall()
+        
+        heading = ["username", "email" , "password" ,"Gender" ,"Mobile No" , 	"Age" , "height" ,	"Weight" , "Remark_member" , "Answer" , "Doctor" ,"remark_doctor" , "Is Doctor"]
+    
+        conn.close()
+
+        return render_template("doc.html", rows =rows, heading = heading)
+
+
+@app.route('/add_remark',  methods=['GET', 'POST'])
+def add_remasrk():
+    form = DocPatient()
+    if request.method == 'POST':
+        username = form.username.data
+
+        remark = form.remark.data
+
+        conn = sqlite3.connect('database.db')
+        
+
+        c = conn.cursor()
+        
+        c.execute('''UPDATE member SET remark_doctor = ? WHERE username = ? AND Doctor=? ''', (remark, username,session["doc"]))
+        
+        conn.commit()
+        conn.close()
+        return redirect(url_for('doc_page'))
+    elif request.method == 'GET': 
+        
+      return render_template('remark_doc.html', form=form, message ="Change Doctor")
+
 
 
 @app.route('/admin',  methods=['GET', 'POST'])
 def admin():
     
     if request.method == 'GET':
-
+        if session["username"] != "admin" :
+            return redirect(url_for('index'))
         conn = sqlite3.connect('database.db')
         
 
@@ -336,23 +399,88 @@ def admin():
 
         c.execute("select * from member")
         rows = (c.fetchall())
-        heading = ["username", "email" , "password" ,"Gender" ,"Mobile No" , 	"Age" , "height" ,	"Weight" , "Remark_member" , "Answer" , "Doctor" ,"remark_doctor" ]
+        heading = ["username", "email" , "password" ,"Gender" ,"Mobile No" , 	"Age" , "height" ,	"Weight" , "Remark_member" , "Answer" , "Doctor" ,"remark_doctor" , "Is Doctor"]
     
         conn.close()
 
         return render_template("admin.html", rows =rows, heading = heading)
 
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
+@app.route('/delete_user',  methods=['GET', 'POST'])
+def delete_user():
+    form = DeleteUser()
+    if request.method == 'POST':
 
+        conn = sqlite3.connect('database.db')
+        
+
+        c = conn.cursor()
+        username = form.username.data
+        sql = 'DELETE FROM member WHERE username=?'
+        
+        cur = conn.cursor()
+        cur.execute(sql, (username,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('admin'))
+    elif request.method == 'GET': 
+        
+      return render_template('del_user.html', form=form, message ="Delete Record")
+
+
+@app.route('/change_doc',  methods=['GET', 'POST'])
+def change_doc():
+    form = ChangeDoc()
+    if request.method == 'POST':
+        username = form.username.data
+        doctor_name = form.doctor_name.data
+
+        conn = sqlite3.connect('database.db')
+        
+
+        c = conn.cursor()
+        
+        c.execute('''UPDATE member SET Doctor = ? WHERE username = ?''', (doctor_name, username,))
+        
+        conn.commit()
+        conn.close()
+        return redirect(url_for('admin'))
+    elif request.method == 'GET': 
+        
+      return render_template('change_doc.html', form=form, message ="Change Doctor")
+
+
+@app.route('/add_doc',  methods=['GET', 'POST'])
+def add_doc():
+    form = AddDoc()
+    if request.method == 'POST':
+        username = form.username.data
+        emailid = form.email.data
+        password = form.password.data
+        mobileno = form.mobile_number.data
+        gender = form.gender.data
+        conn = sqlite3.connect('database.db')
+        
+
+        c = conn.cursor()
+        
+
+        c.execute("INSERT INTO member VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ", (username, emailid, password,gender,mobileno,None,None,None,None,None,None, None,"Yes"))
+ 
+        
+        conn.commit()
+        
+        conn.close()
+        return redirect(url_for('admin'))
+    elif request.method == 'GET': 
+        
+      return render_template('add_doc.html', form=form)
 if __name__ == '__main__':
     
     # conn = sqlite3.connect('database.db')
     # print ("Opened database successfully")
     # c = conn.cursor()
-    # c.execute("""CREATE TABLE member (username TEXT, email TEXT, password TEXT,Gender TEXT,Mobile No TEXT, 	Age TEXT, height TEXT,	Weight TEXT, Remark_member TEXT, Answer TEXT, Doctor TEXT,remark_doctor TEXT)""")
+    # c.execute("""CREATE TABLE member (username TEXT, email TEXT, password TEXT,Gender TEXT,Mobile No TEXT, 	Age TEXT, height TEXT,	Weight TEXT, Remark_member TEXT, Answer TEXT, Doctor TEXT,remark_doctor TEXT, Is_doctor TEXT)""")
     # conn.commit
     # conn.close()
     

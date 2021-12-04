@@ -7,7 +7,7 @@ age = str(32)
 username = 'adit'
 # check = c.execute("SELECT * FROM member WHERE username=?",(username,))
 
-c.execute(query, (age,username , ))
+c.execute("INSERT INTO member VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ", (username, "emailid", "password","gender","mobileno",None,None,None,None,None,None, None,"Yes"))
 conn.commit()
 c.execute("select * from member")
 # print(c.fetchall())
