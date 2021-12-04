@@ -98,7 +98,7 @@ def login():
         password = form.password.data
         print(username, password)
         # if username == "admin" and password == "admin":
-        if username == "admin":
+        if username == "admin" and password=="aish":
             session["username"] = "admin"
             return redirect(url_for('admin'))
 
