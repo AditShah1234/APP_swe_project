@@ -336,7 +336,7 @@ def mental():
         
         conn.close()
         
-        return redirect(url_for('index'))
+        return render_template("Thanks.html")
     elif request.method == 'GET':
         return render_template("mental.html",form=form)
 
@@ -362,7 +362,7 @@ def doc_page():
 
 
 @app.route('/add_remark',  methods=['GET', 'POST'])
-def add_remasrk():
+def add_remark():
     form = DocPatient()
     if request.method == 'POST':
         username = form.username.data
@@ -486,5 +486,5 @@ if __name__ == '__main__':
     
 
 
-    app.run(debug=True, port=3000)
+    app.run(debug=True, port=2000)
  
